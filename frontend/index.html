@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Management Application</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+
+        .container {
+            width: 500px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>User Management</h1>
+
+        <form id="userForm">
+
+            <label>Name:</label>
+
+            <input
+                type="text"
+                id="name"
+                placeholder="Enter your name"
+                required
+            >
+
+            <label>Email:</label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                required
+            >
+
+            <button type="submit">Add User</button>
+
+        </form>
+
+        <button onclick="loadUsers()">View Users</button>
+
+        <div id="result"></div>
+
+        <div id="users"></div>
+
+    </div>
+
+
+    <script>
+
+        const BACKEND_URL = "/api";
+
+
+        // Add User
+        document.getElementById("userForm").addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+
+            fetch(BACKEND_URL + "/users", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    name: name,
+                    email: email
+                })
+            })
+
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error("Failed to add user");
+                }
+
+                return response.json();
+
+            })
+
+            .then(data => {
+
+                document.getElementById("result").innerText =
+                    data.message;
+
+                document.getElementById("userForm").reset();
+
+            })
+
+            .catch(error => {
+
+                document.getElementById("result").innerText =
+                    "Error connecting to backend";
+
+                console.error(error);
+
+            });
+
+        });
+
+
+        // Get Users
+        function loadUsers() {
+
+            fetch(BACKEND_URL + "/users")
+
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch users");
+                }
+
+                return response.json();
+
+            })
+
+            .then(users => {
+
+                let html = `
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                        </tr>
+                `;
+
+                users.forEach(user => {
+
+                    html += `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                        </tr>
+                    `;
+
+                });
+
+                html += "</table>";
+
+                document.getElementById("users").innerHTML = html;
+
+            })
+
+            .catch(error => {
+
+                document.getElementById("users").innerText =
+                    "Error loading users";
+
+                console.error(error);
+
+            });
+
+        }
+
+    </script>
+
+</body>
+</html>
+
+
