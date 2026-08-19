@@ -68,8 +68,25 @@ jobs:
             echo "Checking containers..."
             docker ps
 
-            echo "Testing backend..."
-            curl -f http://localhost:5001/health
+            echo "Waiting for backend to become ready..."
+
+            for i in {1..12}; do
+              if curl -fsS http://localhost:5001/health; then
+                echo
+                echo "Backend is ready!"
+                break
+              fi
+
+              echo "Backend not ready yet... attempt $i/12"
+              sleep 5
+
+              if [ "$i" -eq 12 ]; then
+                echo "Backend failed to become ready"
+                docker ps
+                docker logs multi-tier-backend --tail 100
+                exit 1
+              fi
+            done
 
             echo "Testing users API..."
             curl -f http://localhost:5001/users
