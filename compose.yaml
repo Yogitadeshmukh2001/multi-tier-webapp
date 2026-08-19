@@ -1,0 +1,31 @@
+services:
+
+  backend:
+    
+    image: yogitadeshmukh/multi-tier-backend:latest
+    container_name: multi-tier-backend
+    ports:
+      - "5001:5000"
+    environment:
+      DB_HOST: mysql
+      DB_USER: webapp
+      DB_PASSWORD: Webapp@123
+      DB_NAME: userdb
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    container_name: multi-tier-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Root@123
+      MYSQL_DATABASE: userdb
+      MYSQL_USER: webapp
+      MYSQL_PASSWORD: Webapp@123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
